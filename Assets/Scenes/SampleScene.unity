@@ -251,9 +251,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a643c5c882e5b54aa9fa1de834bdc23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 0
-  height: 0
-  ballAmount: 5
+  width: 3
+  height: 3
+  ballAmount: 2
   cellSource: {fileID: 8150948796277966352, guid: 398c182a948b6244f98c5897d6ae8c87, type: 3}
-  ballSource: {fileID: 7975891158670017087, guid: 3dd72b6b5f98e8e46b32afb1aa189632, type: 3}
+  ballSource: {fileID: 864463079637078874, guid: 3dd72b6b5f98e8e46b32afb1aa189632, type: 3}
+  smallBallSource: {fileID: 7686293393287514417, guid: e3dd9356753318143aba7134edd0fc6a, type: 3}
   cameraSource: {fileID: 723198502}

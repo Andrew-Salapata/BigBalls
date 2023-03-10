@@ -1,13 +1,55 @@
 using System.Collections.Generic;
+using System.Linq;
 using Extensions;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
     private readonly List<Cell> _freeCells = new ();
+    private readonly List<Ball> _smallBalls = new();
+    [CanBeNull] private Ball _ballToMove;
 
-    private readonly List<Cell> _usedCells = new ();
-    
+    public Ball BallToMove
+    {
+        set => _ballToMove = value;
+    }
+
+    public Cell Target
+    {
+        set
+        {
+            if (_ballToMove is null || value.IsEmpty == false) return;
+            UpdateCells(_ballToMove.GridPosition, value);
+            _ballToMove.MoveTo(value);
+            SetDefaults();
+            IncreaseBall();
+            AddBall();
+        }
+    }
+
+    private void IncreaseBall()
+    {
+        foreach (var ball in _smallBalls)
+        {
+            ball.Increase();
+        }
+        _smallBalls.Clear();
+    }
+
+    private void SetDefaults()
+    {
+        _ballToMove = null;
+    }
+
+    private void UpdateCells(Cell from, Cell to)
+    {
+        from.IsEmpty = true;
+        to.IsEmpty = false;
+        _freeCells.Remove(to);
+        _freeCells.Add(from);
+    }
+
     /// <summary>
     /// Width of the play grid.
     /// </summary>
@@ -37,7 +79,7 @@ public class Grid : MonoBehaviour
     /// Camara object.
     /// </summary>
     [SerializeField] private Transform cameraSource;
-
+    
     private void Start()
     {
         JustifyGridSize();
@@ -50,7 +92,7 @@ public class Grid : MonoBehaviour
     {
         for (var i = 0; i < ballAmount; ++i)
         {
-            AddBall();
+            AddBall(); // TODO: generate only big balls.
         }
     }
 
@@ -70,7 +112,8 @@ public class Grid : MonoBehaviour
     {
         for (var x = 0; x < width; x++)
         for (var y = 0; y < height; y++)
-            _freeCells.Add(Instantiate(cellSource, new Vector3(x, y), Quaternion.identity).Init(x, y));
+            _freeCells.Add((Cell)Instantiate(cellSource, new Vector3(x, y),
+                Quaternion.identity).Init(this, new Vector3(x, y)));
 
     }
 
@@ -83,11 +126,18 @@ public class Grid : MonoBehaviour
             height / 2f - Constants.CameraOffset2D,
             Constants.CameraZOffset);
 
-    public void AddBall()
+    // TODO: generate random ball (big or small)
+    private void AddBall()
     {
         var cell = _freeCells.PopRandom();
-        _usedCells.Add(cell);
-        Instantiate(ballSource, cell.Position, Quaternion.identity).Init();
+        var ball = (Ball)Instantiate(ballSource, cell.position, Quaternion.identity).Init(this, cell.position);
+        ball.GridPosition = cell;
+        if (ball.IsSmall)
+        {
+            _smallBalls.Add(ball);
+        }
+        if (_freeCells.Any()) return;
+        Debug.Log("Stop Game"); // TODO: make game finished.
+        
     }
-
 }
